@@ -28,10 +28,13 @@ settings = Settings()
 
 
 def setup_logging() -> None:
-    from pythonjsonlogger import jsonlogger
+    try:
+        from pythonjsonlogger.json import JsonFormatter
+    except ImportError:
+        from pythonjsonlogger.jsonlogger import JsonFormatter  # type: ignore[no-redef]
 
     handler = logging.StreamHandler(sys.stdout)
-    formatter = jsonlogger.JsonFormatter(
+    formatter = JsonFormatter(
         fmt="%(asctime)s %(name)s %(levelname)s %(message)s",
         datefmt="%Y-%m-%dT%H:%M:%S",
     )

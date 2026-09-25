@@ -93,7 +93,7 @@ async def payment_webhook(
     than doing a SELECT-then-INSERT (which has a TOCTOU race).
     """
     if body.status not in ("SUCCESS", "FAILED"):
-        raise HTTPException(status_code=status.HTTP_422_UNPROCESSABLE_ENTITY, detail="status must be SUCCESS or FAILED")
+        raise HTTPException(status_code=422, detail="status must be SUCCESS or FAILED")
 
     result = await db.execute(select(Booking).where(Booking.id == body.booking_id))
     booking = result.scalar_one_or_none()

@@ -2,24 +2,28 @@
 Test fixtures and async DB setup.
 
 We use SQLite (aiosqlite) for tests instead of PostgreSQL for speed and
-no-infra convenience. The main difference is that SQLite doesn't support
-PostgreSQL-specific types like UUID natively — we handle this by using
-String for PKs in the test DB via SQLAlchemy's rendering.
+no-infra convenience. SQLite doesn't support PostgreSQL UUID columns or ENUM
+types natively, so we use a GUID TypeDecorator in the models that renders
+as CHAR(36) on SQLite and native UUID on Postgres.
 
 Tradeoff: SQLite won't catch PostgreSQL-specific constraint behaviours
-(e.g., ENUM types, some FK cascade subtleties). For a production CI pipeline
+(e.g., ENUM type checks, some FK cascade subtleties). For production CI
 you'd spin up a real Postgres via docker-compose or a GitHub Actions service.
-The idempotency test (IntegrityError on duplicate event_id) works because
-SQLite also enforces UNIQUE constraints.
+The idempotency test (IntegrityError on duplicate event_id) works correctly
+because SQLite also enforces UNIQUE constraints.
 """
 
-import asyncio
+import os
 from typing import AsyncGenerator
+from unittest.mock import AsyncMock, patch
 
 import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+# Disable slowapi rate limits globally in tests
+os.environ["RATELIMIT_ENABLED"] = "0"
 
 from app.db.models import Base
 from app.db.session import get_db
@@ -27,7 +31,10 @@ from app.main import app
 
 TEST_DATABASE_URL = "sqlite+aiosqlite:///./test_diagnostic.db"
 
-engine = create_async_engine(TEST_DATABASE_URL, connect_args={"check_same_thread": False})
+engine = create_async_engine(
+    TEST_DATABASE_URL,
+    connect_args={"check_same_thread": False},
+)
 TestSessionLocal = async_sessionmaker(engine, expire_on_commit=False, class_=AsyncSession)
 
 

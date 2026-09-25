@@ -1,7 +1,7 @@
 import logging
+from contextlib import asynccontextmanager
 
-from fastapi import FastAPI, Request, status
-from fastapi.responses import JSONResponse
+from fastapi import FastAPI
 from slowapi import _rate_limit_exceeded_handler
 from slowapi.errors import RateLimitExceeded
 
@@ -14,6 +14,14 @@ setup_logging()
 logger = logging.getLogger(__name__)
 
 
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    logger.info("app started", extra={"env": settings.APP_ENV})
+    yield
+    await engine.dispose()
+    logger.info("app shutdown")
+
+
 def create_app() -> FastAPI:
     app = FastAPI(
         title="EVE Healthcare — Diagnostic Booking API",
@@ -24,6 +32,7 @@ def create_app() -> FastAPI:
         version="1.0.0",
         docs_url="/docs",
         redoc_url="/redoc",
+        lifespan=lifespan,
     )
 
     app.state.limiter = limiter
@@ -37,15 +46,6 @@ def create_app() -> FastAPI:
     @app.get("/health", tags=["meta"])
     async def health():
         return {"status": "ok"}
-
-    @app.on_event("startup")
-    async def startup():
-        logger.info("app started", extra={"env": settings.APP_ENV})
-
-    @app.on_event("shutdown")
-    async def shutdown():
-        await engine.dispose()
-        logger.info("app shutdown")
 
     return app
 

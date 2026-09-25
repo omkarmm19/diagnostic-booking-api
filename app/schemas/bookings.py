@@ -1,8 +1,8 @@
 import uuid
-from datetime import datetime
+from datetime import UTC, datetime
 from decimal import Decimal
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, field_validator
 
 from app.db.models import BookingStatus
 
@@ -15,12 +15,10 @@ class BookingCreate(BaseModel):
     @field_validator("appointment_datetime")
     @classmethod
     def must_be_future(cls, v: datetime) -> datetime:
-        from datetime import timezone
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
         # Make naive datetimes UTC for comparison
         if v.tzinfo is None:
-            from datetime import timezone as tz
-            v = v.replace(tzinfo=tz.utc)
+            v = v.replace(tzinfo=UTC)
         if v <= now:
             raise ValueError("appointment_datetime must be in the future")
         return v

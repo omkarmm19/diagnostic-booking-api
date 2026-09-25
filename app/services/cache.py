@@ -4,7 +4,6 @@ if Redis is unavailable — cache misses just hit the DB instead.
 """
 
 import logging
-from typing import Optional
 
 import redis.asyncio as aioredis
 
@@ -12,10 +11,10 @@ from app.config import settings
 
 logger = logging.getLogger(__name__)
 
-_redis: Optional[aioredis.Redis] = None
+_redis: aioredis.Redis | None = None
 
 
-def get_redis() -> Optional[aioredis.Redis]:
+def get_redis() -> aioredis.Redis | None:
     global _redis
     if _redis is None:
         try:
@@ -25,7 +24,7 @@ def get_redis() -> Optional[aioredis.Redis]:
     return _redis
 
 
-async def get_cached(key: str) -> Optional[str]:
+async def get_cached(key: str) -> str | None:
     r = get_redis()
     if not r:
         return None

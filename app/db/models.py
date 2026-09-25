@@ -2,6 +2,7 @@ import enum
 import uuid
 from datetime import datetime
 
+import sqlalchemy.dialects.postgresql as pg
 from sqlalchemy import (
     DateTime,
     Enum,
@@ -11,8 +12,7 @@ from sqlalchemy import (
     func,
 )
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, relationship
-from sqlalchemy.types import TypeDecorator, CHAR
-import sqlalchemy.dialects.postgresql as pg
+from sqlalchemy.types import CHAR, TypeDecorator
 
 
 class GUID(TypeDecorator):
@@ -84,7 +84,7 @@ class DiagnosticTest(Base):
     bookings: Mapped[list["Booking"]] = relationship("Booking", back_populates="test")
 
 
-class BookingStatus(str, enum.Enum):
+class BookingStatus(enum.StrEnum):
     PENDING = "PENDING"
     CONFIRMED = "CONFIRMED"
     FAILED = "FAILED"
@@ -120,7 +120,7 @@ class Booking(Base):
     payment: Mapped["Payment"] = relationship("Payment", back_populates="booking", uselist=False)
 
 
-class PaymentStatus(str, enum.Enum):
+class PaymentStatus(enum.StrEnum):
     SUCCESS = "SUCCESS"
     FAILED = "FAILED"
 

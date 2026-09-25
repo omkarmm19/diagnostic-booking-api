@@ -1,7 +1,6 @@
 import json
 import logging
 import uuid
-from typing import Optional
 
 from fastapi import APIRouter, Depends, HTTPException, Query, Request, status
 from sqlalchemy import func, select

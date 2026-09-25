@@ -14,10 +14,8 @@ because SQLite also enforces UNIQUE constraints.
 """
 
 import os
-from typing import AsyncGenerator
-from unittest.mock import AsyncMock, patch
+from collections.abc import AsyncGenerator
 
-import pytest
 import pytest_asyncio
 from httpx import ASGITransport, AsyncClient
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine

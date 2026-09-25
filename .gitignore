@@ -52,3 +52,5 @@ Thumbs.db
 
 # ruff
 .ruff_cache/
+test_diagnostic.db
+test_ci.db

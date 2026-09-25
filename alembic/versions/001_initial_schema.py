@@ -51,9 +51,6 @@ def upgrade() -> None:
     )
     op.create_index("ix_diagnostic_tests_centre_id", "diagnostic_tests", ["centre_id"])
 
-    booking_status = postgresql.ENUM("PENDING", "CONFIRMED", "FAILED", "CANCELLED", name="bookingstatus")
-    booking_status.create(op.get_bind())
-
     op.create_table(
         "bookings",
         sa.Column("id", postgresql.UUID(as_uuid=True), nullable=False),
@@ -71,9 +68,6 @@ def upgrade() -> None:
         sa.PrimaryKeyConstraint("id"),
     )
     op.create_index("ix_bookings_user_id", "bookings", ["user_id"])
-
-    payment_status = postgresql.ENUM("SUCCESS", "FAILED", name="paymentstatus")
-    payment_status.create(op.get_bind())
 
     op.create_table(
         "payments",
